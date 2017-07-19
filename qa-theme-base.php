@@ -120,7 +120,7 @@ class qa_html_theme_base
 	}
 
 
-	public function output_split($parts, $class, $outertag='span', $innertag='span', $extraclass=null)
+	public function output_split($parts, $class, $outertag='span', $innertag='span', $extraclass=null , $href = null )
 /*
 	Output the three elements ['prefix'], ['data'] and ['suffix'] of $parts (if they're defined),
 	with appropriate CSS classes based on $class, using $outertag and $innertag in the markup.
@@ -129,13 +129,27 @@ class qa_html_theme_base
 		if (empty($parts) && strtolower($outertag) != 'td')
 			return;
 
-		$this->output(
-			'<'.$outertag.' class="'.$class.(isset($extraclass) ? (' '.$extraclass) : '').'">',
-			(strlen(@$parts['prefix']) ? ('<'.$innertag.' class="'.$class.'-pad">'.$parts['prefix'].'</'.$innertag.'>') : '').
-			(strlen(@$parts['data']) ? ('<'.$innertag.' class="'.$class.'-data">'.$parts['data'].'</'.$innertag.'>') : '').
-			(strlen(@$parts['suffix']) ? ('<'.$innertag.' class="'.$class.'-pad">'.$parts['suffix'].'</'.$innertag.'>') : ''),
-			'</'.$outertag.'>'
-		);
+		if ($href != null)
+		{
+			$this->output(
+				'<'.$outertag." href=".$href.' class="'.$class.(isset($extraclass) ? (' '.$extraclass) : '').'">',
+				(strlen(@$parts['prefix']) ? ('<'.$innertag.' href='.$href.' class="'.$class.'-pad">'.$parts['prefix'].'</'.$innertag.'>') : '').
+				(strlen(@$parts['data']) ? ('<'.$innertag.' href='.$href.' class="'.$class.'-data">'.$parts['data'].'</'.$innertag.'>') : '').
+				(strlen(@$parts['suffix']) ? ('<'.$innertag.' href='.$href.' class="'.$class.'-pad">'.$parts['suffix'].'</'.$innertag.'>') : ''),
+				'</'.$outertag.'>'
+			);
+		}
+		else
+		{
+			$this->output(
+				'<'.$outertag.' class="'.$class.(isset($extraclass) ? (' '.$extraclass) : '').'">',
+				(strlen(@$parts['prefix']) ? ('<'.$innertag.' class="'.$class.'-pad">'.$parts['prefix'].'</'.$innertag.'>') : '').
+				(strlen(@$parts['data']) ? ('<'.$innertag.' class="'.$class.'-data">'.$parts['data'].'</'.$innertag.'>') : '').
+				(strlen(@$parts['suffix']) ? ('<'.$innertag.' class="'.$class.'-pad">'.$parts['suffix'].'</'.$innertag.'>') : ''),
+				'</'.$outertag.'>'
+			);
+		}
+
 	}
 
 
@@ -259,6 +273,7 @@ class qa_html_theme_base
 		$headtitle = (strlen($pagetitle) ? ($pagetitle.' - ') : '').$this->content['site_title'];
 
 		$this->output('<title>'.$headtitle.'</title>');
+
 	}
 
 	public function head_metas()
@@ -289,9 +304,14 @@ class qa_html_theme_base
 
 	public function head_script()
 	{
+		$this->output_raw(' <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js"></script>');
 		if (isset($this->content['script'])) {
 			foreach ($this->content['script'] as $scriptline)
+			{
+
 				$this->output_raw($scriptline);
+
+			}
 		}
 	}
 
@@ -1547,6 +1567,7 @@ class qa_html_theme_base
 	{
 		if (isset($q_list['qs'])) {
 			$this->output('<div class="qa-q-list'.($this->list_vote_disabled($q_list['qs']) ? ' qa-q-list-vote-disabled' : '').'">', '');
+			//$this->output('<div><img src="https://www.bidbarg.com/bimeh/pic/moshavere.gif" </div>');
 			$this->q_list_items($q_list['qs']);
 			$this->output('</div> <!-- END qa-q-list -->', '');
 		}
@@ -1716,10 +1737,11 @@ class qa_html_theme_base
 
 	public function a_count($post)
 	{
+
 		// You can also use $post['answers_raw'] to get a raw integer count of answers
 
-		$this->output_split(@$post['answers'], 'qa-a-count', 'span', 'span',
-			@$post['answer_selected'] ? 'qa-a-count-selected' : (@$post['answers_raw'] ? null : 'qa-a-count-zero'));
+		$this->output_split(@$post['answers'], 'qa-a-count', 'span', 'a',
+			@$post['answer_selected'] ? 'qa-a-count-selected' : (@$post['answers_raw'] ? null : 'qa-a-count-zero'),@$post['url']);
 	}
 
 	public function view_count($post)
@@ -2039,11 +2061,14 @@ class qa_html_theme_base
 			$this->q_view_clear();
 
 			$this->output('</div> <!-- END qa-q-view -->', '');
+			$this->output('<div><a href="https://www.bidbarg.com/example"><img src="https://www.bidbarg.com/bimeh/pic/moshavere.gif"/></a>  </div>');
+
 		}
 	}
 
 	public function q_view_stats($q_view)
 	{
+
 		$this->output('<div class="qa-q-view-stats">');
 
 		$this->voting($q_view);
